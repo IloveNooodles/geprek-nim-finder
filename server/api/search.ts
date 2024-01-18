@@ -70,7 +70,7 @@ const getTokens = async (query: string, settings?: Partial<SearchConfig>) => {
   let cleanQuery = query
 
   let offset = 0
-  while (occurrences.length != 0) {
+  while (occurrences.length !== 0) {
     const [index, length] = occurrences.pop()!
     cleanQuery =
       cleanQuery.slice(0, index + offset) + cleanQuery.slice(index + length + offset)

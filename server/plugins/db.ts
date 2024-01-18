@@ -11,33 +11,45 @@ const STUDENT_JSON_LIST = [
   '22.json'
 ]
 
-const setupStudentsData = async () => {
-  const studentsList: [string, string, string][] = []
-  for (const filename of STUDENT_JSON_LIST) {
-    const response = await fetch(`https://cdn.jsdelivr.net/gh/mkamadeus/geprek-nim-data@v1.0.0/${filename}`)
-    if (!response.ok) {
-      throw new Error(`Failed to fetch student data for ${filename}`)
-    }
+type Student = [string, string, string];
 
-    const students: [string, string, string][] = await response.json()
-    studentsList.push(...students)
+const setupStudentsData = async () => {
+  const response = await fetch(
+    'https://cdn.jsdelivr.net/gh/mkamadeus/geprek-nim-data@v1.0.1/13_23.json'
+  )
+
+  const flattenStudentList: Array<Student> = []
+  const studentsList: Array<Array<Student>> = await response.json()
+  for (const student of studentsList) {
+    flattenStudentList.push(...student)
   }
+
   // studentsList.sort((s1, s2) => s1[0].localeCompare(s2[0]))
-  await useStorage().setItem<Student[]>('students', studentsList.map(s => ({
-    name: s[0],
-    tpbID: s[1] as `${number}`,
-    majorID: s[2] as `${number}`
-  })))
+  await useStorage().setItem<Student[]>(
+    'students',
+    flattenStudentList.map(s => ({
+      name: s[0],
+      tpbID: s[1] as `${number}`,
+      majorID: s[2] as `${number}`
+    }))
+  )
+
+  const student = await useStorage().getItem('students')
+  console.log(student)
 }
 
 // TODO: fetch major and faculty data mapping
 const setupMajorAndFacultyMapping = async () => {
-  const facultyResponse = await fetch('https://cdn.jsdelivr.net/gh/mkamadeus/geprek-nim-data@v1.0.0/kode_fakultas.json')
+  const facultyResponse = await fetch(
+    'https://cdn.jsdelivr.net/gh/mkamadeus/geprek-nim-data@v1.0.1/kode_fakultas.json'
+  )
   if (!facultyResponse.ok) {
     throw new Error('Failed to fetch faculty mapping')
   }
 
-  const majorResponse = await fetch('https://cdn.jsdelivr.net/gh/mkamadeus/geprek-nim-data@v1.0.0/kode_jurusan.json')
+  const majorResponse = await fetch(
+    'https://cdn.jsdelivr.net/gh/mkamadeus/geprek-nim-data@v1.0.1/kode_jurusan.json'
+  )
   if (!majorResponse.ok) {
     throw new Error('Failed to fetch major mapping')
   }
@@ -48,12 +60,16 @@ const setupMajorAndFacultyMapping = async () => {
   const mapping = { ...facultyMapping, ...majorMapping }
   await useStorage().setItem<Record<string, string>>('codes', mapping)
 
-  const facultyListResponse = await fetch('https://cdn.jsdelivr.net/gh/mkamadeus/geprek-nim-data@v1.0.0/list_fakultas.json')
+  const facultyListResponse = await fetch(
+    'https://cdn.jsdelivr.net/gh/mkamadeus/geprek-nim-data@v1.0.1/list_fakultas.json'
+  )
   if (!facultyListResponse.ok) {
     throw new Error('Failed to fetch faculty mapping')
   }
 
-  const majorListResponse = await fetch('https://cdn.jsdelivr.net/gh/mkamadeus/geprek-nim-data@v1.0.0/list_jurusan.json')
+  const majorListResponse = await fetch(
+    'https://cdn.jsdelivr.net/gh/mkamadeus/geprek-nim-data@v1.0.1/list_jurusan.json'
+  )
   if (!majorListResponse.ok) {
     throw new Error('Failed to fetch major mapping')
   }
